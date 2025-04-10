@@ -146,6 +146,12 @@ func ScopeUnpaginated[T any](db *gorm.DB, request *Request, dest *[]T) *gorm.DB 
 	return (&Settings[T]{}).ScopeUnpaginated(db, request, dest)
 }
 
+// ScopeCount using the default FilterSettings. See `FilterSettings.ScopeCount()` for more details.
+func ScopeCount[T any](db *gorm.DB, request *Request, dest *[]T) (int64, error) {
+	return (&Settings[T]{}).ScopeCount(db, request, dest)
+}
+
+
 // Scope apply all filters, sorts and joins defined in the request's data to the given `*gorm.DB`
 // and process pagination. Returns the resulting `*database.Paginator`.
 // The given request is expected to be validated using `ApplyValidation`.
@@ -189,6 +195,16 @@ func (s *Settings[T]) ScopeUnpaginated(db *gorm.DB, request *Request, dest *[]T)
 		return db
 	}
 	return db.Find(dest)
+}
+
+// ScopeCountapply all filters defined in the request's data to the given `*gorm.DB`
+// and returns the count of records.
+// The given request is expected to be validated using `ApplyValidation`.
+func (s *Settings[T]) ScopeCount(db *gorm.DB, request *Request, dest *[]T) (int64, error) {
+	db, _, _ = s.scopeCommon(db, request, dest)
+	var count int64
+	err := db.Count(&count).Error
+	return count, err
 }
 
 // scopeCommon applies all scopes common to both the paginated and non-paginated requests.
